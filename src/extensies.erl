@@ -1,8 +1,8 @@
 %%%-------------------------------------------------------------------
-%%% @author Thomas
-%%% @copyright (C) 2017, <COMPANY>
+%%% @author Thomas Vandenabeele
+%%% @copyright (C) 2017, Universiteit Hasselt & KU Leuven
 %%% @doc
-%%%
+%%% Extensie functies om eenvoudig te gebruiken in andere modules
 %%% @end
 %%% Created : 06. Jan 2017 10:05
 %%%-------------------------------------------------------------------

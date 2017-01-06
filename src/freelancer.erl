@@ -1,8 +1,9 @@
 %%%-------------------------------------------------------------------
-%%% @author Thomas
-%%% @copyright (C) 2017, <COMPANY>
+%%% @author Thomas Vandenabeele
+%%% @copyright (C) 2017, Universiteit Hasselt & KU Leuven
 %%% @doc
-%%%
+%%% Freelance Driver Applicatie
+%%% Hoofdmodule voor app
 %%% @end
 %%% Created : 05. Jan 2017 17:15
 %%%-------------------------------------------------------------------

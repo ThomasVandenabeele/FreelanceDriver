@@ -1,7 +1,10 @@
 %%%-------------------------------------------------------------------
-%%% @author Thomas
-%%% @copyright (C) 2017, <COMPANY>
+%%% @author Thomas Vandenabeele
+%%% @copyright (C) 2017, Universiteit Hasselt & KU Leuven
 %%% @doc
+%%%
+%%% Simulator module om de freelance drivers applicatie te testen
+%%%           Start simulatie met simulator:start().
 %%%
 %%% @end
 %%% Created : 05. Jan 2017 18:14
