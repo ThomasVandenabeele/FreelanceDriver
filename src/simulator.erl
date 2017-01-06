@@ -48,7 +48,7 @@ run_simulatie() ->
     [
       maak_event({{2017, 1, 5}, {20, 0, 0}}, {{2017, 1, 5}, {22, 0, 0}}),
       maak_event({{2017, 1, 6}, {10, 0, 0}}, {{2017, 1, 6}, {14, 0, 0}}, J1_id),
-      #event{id = E1_id} = maak_event({{2017, 1, 7}, {5, 30, 0}}, {{2017, 1, 7}, {6, 30, 0}}, J2_id)
+      #event{id = E1_id} = maak_event({{2017, 1, 6}, {5, 30, 0}}, {{2017, 1, 6}, {6, 30, 0}}, J2_id)
     ]),
 
   io:fwrite("Start data aangemaakt. Bekijken via observer:start().~n", []),
@@ -67,8 +67,24 @@ run_simulatie() ->
 
   Lijst = freelancer:get_werkuren_lonen_deze_week(F1_id),
   {TotaalUur, TotaalVergoeding} = freelancer:get_totaal_werkuur_vergoeding_deze_week(F1_id),
-  io:fwrite("De freelancer ~p verkrijgt volgende opdrachtvergoedingen:~n~p.~n", [F1_id, Lijst]),
-  io:fwrite("De freelancer ~p verdient voor deze week in totaal dus ~p euro om voor ~p uren te werken.~n", [F1_id, TotaalVergoeding, TotaalUur]),
+  io:fwrite("De freelancer ~s verkrijgt volgende opdrachtvergoedingen:~n~p.~n", [freelancer:format_naam_freelancer(F1_id), Lijst]),
+  io:fwrite("De freelancer ~s verdient voor deze week in totaal dus ~p euro om voor ~p uren te werken.~n", [freelancer:format_naam_freelancer(F1_id), TotaalVergoeding, TotaalUur]),
+
+  io:fwrite("--------------------------------------------------------------------------------------------------------~n", []),
+
+  Datum = {2017, 1, 6},
+  Lijst2 = freelancer:get_jobs_op_dag(F1_id, Datum),
+  io:fwrite("De freelancer ~p heeft op ~p volgende opdrachten: ~n~p~n", [freelancer:format_naam_freelancer(F1_id), Datum, Lijst2]),
+
+  io:fwrite("--------------------------------------------------------------------------------------------------------~n", []),
+
+  Events = freelancer:get_events_op_dag(Datum),
+  io:fwrite("Er zijn op ~p ~p agenda-items, namelijk: ~n~p~n", [Datum, length(Events), Events]),
+
+  io:fwrite("--------------------------------------------------------------------------------------------------------~n", []),
+
+  Events2 = freelancer:get_events_op_dag(F1_id, Datum),
+  io:fwrite("De freelancer ~p heeft op ~p volgende agenda-items: ~n~p~n", [freelancer:format_naam_freelancer(F1_id), Datum, Events2]),
 
   io:fwrite("========================================================================================================~n", []),
   io:fwrite("                                       EINDE SIMULATIE.~n", []),
@@ -78,18 +94,18 @@ run_simulatie() ->
 
 % Hulpfunctie om ook via console een freelancer record aan te kunnen maken
 maak_freelancer(N, VN, LT, C) ->
-  #freelancer{id = make_ref(), naam=N, voornaam=VN, leeftijd=LT, contactgegevens=C}.
+  #freelancer{id = extensies:unieke_id(), naam=N, voornaam=VN, leeftijd=LT, contactgegevens=C}.
 
 % Hulpfunctie om ook via console een job record aan te kunnen maken
 maak_job(B, V, OG, F) ->
-  #job{id = make_ref(), beschrijving = B, vergoeding = V, opdrachtgever = OG, freelancer_id = F}.
+  #job{id = extensies:unieke_id(), beschrijving = B, vergoeding = V, opdrachtgever = OG, freelancer_id = F}.
 
 % Hulpfunctie om ook via console een event record aan te kunnen maken zonder opdracht
 maak_event(S, E) ->
   D = extensies:get_duur(S, E),
-  #event{id = make_ref(), start = S, duur = D}.
+  #event{id = extensies:unieke_id(), start = S, duur = D}.
 
 % Hulpfunctie om ook via console een event record aan te kunnen maken met opdracht/job
 maak_event(S, E, O) ->
   D = extensies:get_duur(S, E),
-  #event{id = make_ref(), start = S, duur = D, opdracht = O}.
+  #event{id = extensies:unieke_id(), start = S, duur = D, opdracht = O}.

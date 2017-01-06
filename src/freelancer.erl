@@ -13,7 +13,9 @@
 -export([start/0, insert/1, wijs_event_af/2, get_werkuur_loon_opdracht/1, get_event_bij_job/1,
   get_werkuren_lonen_deze_week/1, get_totaal_werkuur_vergoeding_deze_week/1,
   get_werkuren_lonen_gegeven_week/2, get_totaal_werkuur_vergoeding_gegeven_week/2,
-  registreer_event/1]).
+  registreer_event/1, get_jobs_op_dag/2,
+  get_events_op_dag/1, get_events_op_dag/2,
+  format_naam_freelancer/1, get_naam_freelancer/1]).
 
 -include("records.hrl").
 
@@ -35,15 +37,30 @@ insert(_) ->
 
 % Registreer een nieuw evenement in de kalender
 % Wanneer het om een event met een opdracht gaat,
-% zou er een melding kunnen gestuurd worden via sms/email aan de freelancer.
 registreer_event(E = #event{opdracht = null}) ->
   insert(E);
 registreer_event(E = #event{}) ->
   [Job] = ets:match_object(jobs, #job{id = E#event.opdracht, _='_'}),
   [F] = ets:match_object(freelancers, #freelancer{id = Job#job.freelancer_id, _='_'}),
-  #{adres := _, tel := Tel, email := Mail} = F#freelancer.contactgegevens,
-  io:fwrite("Nieuw event voor freelancer '~s ~s',~n     er wordt een melding gestuurd naar ~s en ~s.~n", [F#freelancer.naam, F#freelancer.voornaam, Tel, Mail]),
+  notificatie_event_freelancer(F),
   insert(E).
+
+% Haal alle events van bepaalde dag op
+get_events_op_dag(Datum) ->
+  ets:match_object(agenda, #event{start = {Datum, '_'}, _='_'}).
+get_events_op_dag(FID, Datum) ->
+  map_jobs_naar_events(get_jobs_op_dag(FID, Datum)).
+
+%% Haal de jobs op van bepaalde freelancer op gegeven datum
+%% Returns: Lijst van job records
+get_jobs_op_dag(FID, Datum) ->
+  AllJobs = ets:match_object(jobs, #job{freelancer_id = FID, _='_'}),
+  MetEvent = lists:map(fun(J) -> {J, get_event_bij_job(J#job.id)} end, AllJobs),
+  OpDatum = lists:filter(fun({_, E}) ->
+                          {StartD, _} = E#event.start,
+                          StartD == Datum
+                         end, MetEvent),
+  lists:map(fun({J, _})-> J end, OpDatum).
 
 % Haal het totaal aantal werkuren en vergoeding van de huidige week op
 % Returns: {Totaal Werkuren per week, Totale vergoeding van de week}
@@ -124,9 +141,11 @@ wijs_event_af(FID, EID) ->
             if
               length(BeschikbareFls)==0 -> io:fwrite("Er zijn geen andere freelancers beschikbaar, je zal moeten werken~n", []);
               true ->
-                % Neem eerstvolgende mogelijke freelancer de opdracht
-                F = lists:nth(1, BeschikbareFls),
+                % Neem random een beschikbare freelancer voor de opdracht
+                Index = rand:uniform(length(BeschikbareFls)),
+                F = lists:nth(Index, BeschikbareFls),
                 ets:update_element(jobs, JobId, {6, F#freelancer.id}) orelse io:fwrite("De herindeling is niet gelukt~n", []),
+                notificatie_event_freelancer(F),
                 io:fwrite("Job ~p '~s' is nu toegekend aan '~s ~s'.~n", [Job#job.id, Job#job.beschrijving, F#freelancer.naam, F#freelancer.voornaam])
             end
         end
@@ -145,6 +164,16 @@ check_overlapping(BeginTijd, EindTijd, Lijst) ->
         end, Lijst)) =/= 0
   end.
 
+% Formatteer de naam van de freelancer op basis van ID naar string/list
+format_naam_freelancer(FID) ->
+  {Naam, Voornaam} = get_naam_freelancer(FID),
+  Naam ++ " " ++ Voornaam.
+
+% Haal de naam op van de freelancer op basis van ID
+get_naam_freelancer(FID) ->
+  [[Naam, Voornaam]] = ets:match(freelancers, #freelancer{id = FID, naam='$1', voornaam = '$2', _ = '_'}),
+  {Naam, Voornaam}.
+
 % Haal het bijhorende event op bij specifieke job
 get_event_bij_job(JID) ->
   [E] = ets:match_object(agenda, #event{opdracht = JID, _='_'}), E.
@@ -153,6 +182,10 @@ get_event_bij_job(JID) ->
 map_jobs_naar_events(Jobs) ->
   lists:map(fun(J) -> get_event_bij_job(J#job.id) end, Jobs).
 
+% Hier zou er een melding kunnen gestuurd worden via sms/email aan de freelancer. (niet verder uitgewerkt)
+notificatie_event_freelancer(F) ->
+  #{adres := _, tel := Tel, email := Mail} = F#freelancer.contactgegevens,
+  io:fwrite("Nieuw event voor freelancer '~s ~s',~n     er wordt een melding gestuurd naar ~s en ~s.~n", [F#freelancer.naam, F#freelancer.voornaam, Tel, Mail]).
 
 
 
