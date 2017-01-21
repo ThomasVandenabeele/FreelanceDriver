@@ -37,7 +37,6 @@ insert(_) ->
   throw({error, undefined_record}).
 
 % Registreer een nieuw evenement in de kalender
-% Wanneer het om een event met een opdracht gaat,
 registreer_event(E = #event{opdracht = null}) ->
   insert(E);
 registreer_event(E = #event{}) ->
@@ -49,6 +48,7 @@ registreer_event(E = #event{}) ->
 % Haal alle events van bepaalde dag op
 get_events_op_dag(Datum) ->
   ets:match_object(agenda, #event{start = {Datum, '_'}, _='_'}).
+% Haal alle events van bepaalde dag op van freelancer
 get_events_op_dag(FID, Datum) ->
   map_jobs_naar_events(get_jobs_op_dag(FID, Datum)).
 

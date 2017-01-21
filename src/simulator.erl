@@ -26,19 +26,21 @@ start() ->
   run_simulatie().
 
 run_simulatie() ->
+  {Datum, _} = calendar:local_time(),
+
   lists:foreach(fun(F) -> freelancer:insert(F) end,
     [
       #freelancer{id = F1_id} = maak_freelancer("Roelink", "Filip", 61,
-        #{adres => {"Hauwaart 125", "9310 Meldert"}, tel => "0476 79 29 18", email => "FlipRoelink@teleworm.us"}),
+        #{adres => {"Hauwaart 125", "9310 Meldert"}, tel => "0476 79 29 18", email => "FlipRoelink@gmail.com"}),
 
       maak_freelancer("van Zanden", "Lyam", 32,
-        #{adres => {"Herentalsebaan 346", "1080 Brussel"}, tel => "0481 21 14 02", email => "LyamvanZanden@jourrapide.com"}),
+        #{adres => {"Herentalsebaan 346", "1080 Brussel"}, tel => "0481 21 14 02", email => "LyamvanZanden@gmail.com"}),
 
       #freelancer{id = F2_id} = maak_freelancer("Verhees", "Geoffrey", 25,
-        #{adres => {"Stationsstraat 496", "5032 Isnes"}, tel => "0491 72 08 42", email => "GeoffreyVerhees@armyspy.com"}),
+        #{adres => {"Stationsstraat 496", "5032 Isnes"}, tel => "0491 72 08 42", email => "GeoffreyVerhees@gmail.com"}),
 
       maak_freelancer("Arets", "Freddy", 47,
-        #{adres => {"Herentalsebaan 431", "1050 Brussel"}, tel => "0495 90 54 68", email => "FreddyArets@armyspy.com"})
+        #{adres => {"Herentalsebaan 431", "1050 Brussel"}, tel => "0495 90 54 68", email => "FreddyArets@gmail.com"})
     ]),
 
   lists:foreach(fun(J) -> freelancer:insert(J) end,
@@ -49,9 +51,9 @@ run_simulatie() ->
 
   lists:foreach(fun(E) -> freelancer:registreer_event(E) end,
     [
-      maak_event({{2017, 1, 5}, {20, 0, 0}}, {{2017, 1, 5}, {22, 0, 0}}),
-      maak_event({{2017, 1, 6}, {10, 0, 0}}, {{2017, 1, 6}, {14, 0, 0}}, J1_id),
-      #event{id = E1_id} = maak_event({{2017, 1, 6}, {5, 30, 0}}, {{2017, 1, 6}, {6, 30, 0}}, J2_id)
+      maak_event({Datum, {20, 0, 0}}, {Datum, {22, 0, 0}}),
+      maak_event({Datum, {10, 0, 0}}, {Datum, {14, 0, 0}}, J1_id),
+      #event{id = E1_id} = maak_event({Datum, {5, 30, 0}}, {Datum, {6, 30, 0}}, J2_id)
     ]),
 
   io:fwrite("Start data aangemaakt. Bekijken via observer:start().~n", []),
@@ -75,7 +77,7 @@ run_simulatie() ->
 
   io:fwrite("--------------------------------------------------------------------------------------------------------~n", []),
 
-  Datum = {2017, 1, 6},
+  %Datum = {2017, 1, 21},
   Lijst2 = freelancer:get_jobs_op_dag(F1_id, Datum),
   io:fwrite("De freelancer ~p heeft op ~p volgende opdrachten: ~n~p~n", [freelancer:format_naam_freelancer(F1_id), Datum, Lijst2]),
 
